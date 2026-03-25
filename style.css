@@ -1,35 +1,277 @@
 /* W5 PR 協作練習樣式 */
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: sans-serif;
-  background-color: #f0f4f8;
+  background-color: #fff9c4;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  overflow: hidden;
 }
 
-.container {
+/* ══════════════════════════════════════
+   登入畫面
+   ══════════════════════════════════════ */
+.login-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+}
+
+.login-box {
   background: white;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.login-box h2 { font-size: 22px; color: #4f8ef7; margin-bottom: 8px; }
+.login-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+.login-box input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.login-box input:focus { border-color: #4f8ef7; }
+
+#login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #4f8ef7;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+#login-btn:hover { opacity: 0.85; }
+
+.login-error { color: #e74c3c; font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+/* ══════════════════════════════════════
+   主介面容器
+   ══════════════════════════════════════ */
+.container {
+  background: #fffcf0;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 480px;
   max-width: 95vw;
   overflow: hidden;
+  flex-direction: column;
 }
 
 /* ── header ──────────────────────────
    組長任務：修改 background 顏色
    ──────────────────────────────────── */
 header {
-  background: #4f8ef7;
+  background: #ff8fab;
   color: white;
   padding: 20px 24px;
 }
-header h1 { font-size: 20px; }
-header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+header h1 {
+  font-size: 20px;
+}
+
+header .subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+/* ── 用戶資訊列 ── */
+.user-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #f7f9fc;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  color: #555;
+}
+.user-bar-actions { display: flex; gap: 8px; }
+
+.btn-history, .btn-logout {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-history { background: #e8f0fe; color: #4f8ef7; }
+.btn-logout  { background: #fdecea; color: #e74c3c; }
+.btn-history:hover, .btn-logout:hover { opacity: 0.8; }
+
+/* ── 歷史紀錄面板 ── */
+.history-panel {
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+}
+.history-header button {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 12px;
+  cursor: pointer;
+}
+.history-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 12px;
+}
+.history-ts { color: #aaa; font-size: 11px; }
+.history-msg { margin-top: 4px; padding: 4px 8px; border-radius: 6px; }
+.user-msg { background: #e8f0fe; color: #333; }
+.bot-msg  { background: #f0f4f8; color: #555; }
+.history-empty { padding: 20px; text-align: center; color: #aaa; font-size: 13px; }
+
+/* ── 歷史 Session 卡片 ── */
+.history-session {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.history-session:hover { background: #eef4ff; }
+
+.session-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+.session-ts { color: #888; }
+.session-count { color: #4f8ef7; }
+.session-preview {
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 查看歷史提示列 ── */
+.restore-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #fff3cd;
+  border-bottom: 1px solid #ffc107;
+  font-size: 13px;
+  color: #856404;
+}
+.restore-bar button {
+  background: #ffc107;
+  color: #333;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.restore-bar button:hover { opacity: 0.8; }
+
+/* ── 聊天區 ── */
+/* ── 搜尋列 ──────────────────────────── */
+.search-area {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 8px;
+  border-bottom: 1px solid #eee;
+  background: #f9fbfd;
+}
+
+.search-area input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-area input:focus {
+  border-color: #4f8ef7;
+  box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.15);
+}
+
+#clear-search-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: none;
+  transition: color 0.2s;
+}
+
+#clear-search-btn:hover {
+  color: #e74c3c;
+  background: #fef0ef;
+}
+
+#search-result-count {
+  font-size: 12px;
+  color: #4f8ef7;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── 搜尋高亮 ─── */
+mark.highlight {
+  background: #fff3b0;
+  color: #333;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
 
 #chat-box {
   height: 360px;
@@ -46,6 +288,16 @@ header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
   border-radius: 12px;
   font-size: 14px;
   line-height: 1.5;
+  position: relative;
+}
+
+/* ── 組員 A 任務：在這裡加 .timestamp 樣式 ── */
+.timestamp {
+  display: block;
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 4px;
+  text-align: right;
 }
 
 .message.bot {
@@ -54,9 +306,8 @@ header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
   align-self: flex-start;
 }
 
-/* ── 組員 A 任務：在這裡加 .timestamp 樣式 ── */
 .message.user {
-  background: #4f8ef7;
+  background: #ff8fab;
   color: white;
   align-self: flex-end;
 }
@@ -77,11 +328,13 @@ header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
   outline: none;
 }
 
-.input-area input:focus { border-color: #4f8ef7; }
+.input-area input:focus {
+  border-color: #a2d2ff;
+}
 
 /* ── 組員 B 任務：在這裡加清除按鈕樣式 ── */
 .input-area button {
-  background: #4f8ef7;
+  background: #a2d2ff;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -90,7 +343,9 @@ header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
   font-size: 14px;
 }
 
-.input-area button:hover { opacity: 0.85; }
+.input-area button:hover {
+  opacity: 0.85;
+}
 
 /* ── 組員 D 任務：在這裡加 body.dark 深色模式樣式 ── */
 
@@ -101,4 +356,73 @@ footer {
   color: #aaa;
   text-align: center;
   border-top: 1px solid #f0f0f0;
+}
+
+.hearts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heart {
+  position: absolute;
+  bottom: -50px;
+  font-size: 24px;
+  color: #ff4d4d;
+  animation: floatUp 6s infinite linear;
+  opacity: 0;
+}
+
+.heart:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.heart:nth-child(2) {
+  left: 25%;
+  animation-delay: 2s;
+}
+
+.heart:nth-child(3) {
+  left: 45%;
+  animation-delay: 1s;
+}
+
+.heart:nth-child(4) {
+  left: 65%;
+  animation-delay: 3s;
+}
+
+.heart:nth-child(5) {
+  left: 85%;
+  animation-delay: 1.5s;
+}
+
+.heart:nth-child(6) {
+  left: 95%;
+  animation-delay: 4s;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-110vh) rotate(360deg);
+    opacity: 0;
+  }
 }
