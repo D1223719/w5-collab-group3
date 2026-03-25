@@ -46,6 +46,64 @@ header .subtitle {
   margin-top: 4px;
 }
 
+/* ── 搜尋列 ──────────────────────────── */
+.search-area {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 8px;
+  border-bottom: 1px solid #eee;
+  background: #f9fbfd;
+}
+
+.search-area input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-area input:focus {
+  border-color: #4f8ef7;
+  box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.15);
+}
+
+#clear-search-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: none;
+  transition: color 0.2s;
+}
+
+#clear-search-btn:hover {
+  color: #e74c3c;
+  background: #fef0ef;
+}
+
+#search-result-count {
+  font-size: 12px;
+  color: #4f8ef7;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── 搜尋高亮 ─── */
+mark.highlight {
+  background: #fff3b0;
+  color: #333;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+
 #chat-box {
   height: 360px;
   overflow-y: auto;
