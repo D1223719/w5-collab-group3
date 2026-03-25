@@ -7,17 +7,52 @@
 </head>
 <body>
 
-  <div class="container">
+  <!-- ────────── 登入畫面 ────────── -->
+  <div id="login-screen" class="login-overlay">
+    <div class="login-box">
+      <h2>🔑 登入 Chatbot</h2>
+      <p class="login-sub">請輸入你的用戶名稱以繼續</p>
+      <input id="username-input" type="text" placeholder="用戶名稱..." maxlength="20">
+      <button id="login-btn" onclick="login()">登入</button>
+      <p id="login-error" class="login-error"></p>
+    </div>
+  </div>
+
+  <!-- ────────── 主介面 ────────── -->
+  <div id="main-app" class="container" style="display:none;">
     <header>
       <!-- 組長任務：把標題改成你們組的名字 -->
       <h1>🤖 第 X 組的 Chatbot</h1>
       <p class="subtitle">W5 PR 協作練習</p>
+      <!-- 組員 C 任務：在 header 下方加字數統計 p 元素 -->
+      <!-- 組員 D 任務：在 header 加深色模式切換按鈕 -->
     </header>
 
-    <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
-    <!-- 組員 C 任務：在 header 下方加字數統計 p 元素 -->
-    <!-- 組員 D 任務：在 header 加深色模式切換按鈕 -->
+    <!-- 用戶資訊列 -->
+    <div class="user-bar">
+      <span id="welcome-text">👤 歡迎，<strong></strong></span>
+      <div class="user-bar-actions">
+        <button class="btn-history" onclick="toggleHistory()">📋 歷史紀錄</button>
+        <button class="btn-logout" onclick="logout()">登出</button>
+      </div>
+    </div>
 
+    <!-- 歷史對話紀錄面板 -->
+    <div id="history-panel" class="history-panel" style="display:none;">
+      <div class="history-header">
+        <span>📋 歷史對話（點擊可恢復）</span>
+        <button onclick="clearAllHistory()">🗑 全部清除</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
+
+    <!-- 恢復提示列 -->
+    <div id="restore-bar" class="restore-bar" style="display:none;">
+      <span>⏪ 正在查看歷史對話</span>
+      <button onclick="backToCurrentSession()">返回目前對話</button>
+    </div>
+
+    <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
     <!-- 搜尋對話功能 -->
     <div class="search-area">
       <input id="search-input" type="text" placeholder="🔍 搜尋對話內容..." oninput="searchMessages()">
@@ -31,7 +66,7 @@
       </div>
     </div>
 
-    <div class="input-area">
+    <div id="input-area" class="input-area">
       <input id="user-input" type="text" placeholder="輸入訊息...">
       <button onclick="sendMessage()">送出</button>
       <!-- 組員 B 任務：在這裡加清除按鈕 -->
@@ -42,26 +77,156 @@
   </div>
 
   <script>
+    // ─── 狀態變數 ─────────────────────────────
+    let currentSessionId = null;   // 當前 session ID
+    let isViewingHistory = false;  // 是否正在查看歷史
+
+    // ─── 工具函數 ─────────────────────────────
+    function getTimestamp() {
+      return new Date().toLocaleString('zh-Hant', {
+        month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function genSessionId() {
+      return Date.now().toString(36);
+    }
+
+    // ─── 登入 / 登出 ──────────────────────────
+    function login() {
+      const usernameInput = document.getElementById('username-input');
+      const username = usernameInput.value.trim();
+      const errorEl = document.getElementById('login-error');
+
+      if (!username) {
+        errorEl.textContent = '請輸入用戶名稱！';
+        usernameInput.focus();
+        return;
+      }
+
+      localStorage.setItem('chatbot_user', username);
+      errorEl.textContent = '';
+      startNewSession(username);
+      showMainApp(username);
+    }
+
+    function logout() {
+      // 儲存當前 session 後登出
+      saveCurrentSession();
+      localStorage.removeItem('chatbot_user');
+      currentSessionId = null;
+      isViewingHistory = false;
+
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('username-input').value = '';
+      document.getElementById('history-panel').style.display = 'none';
+      document.getElementById('restore-bar').style.display = 'none';
+      resetChatBox();
+    }
+
+    function showMainApp(username) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'flex';
+      document.querySelector('#welcome-text strong').textContent = username;
+    }
+
+    // ─── 登入鍵盤支援 ─────────────────────────
+    document.getElementById('username-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    // ─── 自動登入 ─────────────────────────────
+    window.addEventListener('DOMContentLoaded', function() {
+      const saved = localStorage.getItem('chatbot_user');
+      if (saved) {
+        startNewSession(saved);
+        showMainApp(saved);
+      }
+    });
+
+    // ─── Session 管理 ─────────────────────────
+    function getSessionsKey(username) {
+      return `chatbot_sessions_${username}`;
+    }
+
+    function startNewSession(username) {
+      currentSessionId = genSessionId();
+      // 初始化空 session（等待第一則訊息才正式儲存）
+      resetChatBox();
+      isViewingHistory = false;
+      document.getElementById('restore-bar').style.display = 'none';
+      document.getElementById('input-area').style.display = 'flex';
+    }
+
+    function saveCurrentSession() {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username || !currentSessionId) return;
+
+      // 收集聊天視窗中的訊息
+      const chatBox = document.getElementById('chat-box');
+      const messages = [];
+      chatBox.querySelectorAll('.message').forEach(el => {
+        const isUser = el.classList.contains('user');
+        const ts = el.querySelector('.timestamp')?.textContent || '';
+        const text = el.childNodes[0]?.textContent?.trim() || '';
+        if (text) messages.push({ role: isUser ? 'user' : 'bot', text, ts });
+      });
+
+      // 如果只有初始 bot 訊息，不儲存
+      if (messages.length <= 1) return;
+
+      const key = getSessionsKey(username);
+      const sessions = JSON.parse(localStorage.getItem(key) || '[]');
+
+      // 更新或插入 session
+      const idx = sessions.findIndex(s => s.id === currentSessionId);
+      const sessionData = {
+        id: currentSessionId,
+        ts: getTimestamp(),
+        preview: messages.find(m => m.role === 'user')?.text || '',
+        messages
+      };
+
+      if (idx >= 0) {
+        sessions[idx] = sessionData;
+      } else {
+        sessions.unshift(sessionData);
+      }
+
+      // 最多保留 20 個 sessions
+      if (sessions.length > 20) sessions.pop();
+      localStorage.setItem(key, JSON.stringify(sessions));
+    }
+
+    // ─── 聊天功能 ─────────────────────────────
     function sendMessage() {
+      if (isViewingHistory) return;
+
       const input = document.getElementById('user-input');
       const chatBox = document.getElementById('chat-box');
       const text = input.value.trim();
-
       if (!text) return;
 
-      const userDiv = document.createElement('div');
-      userDiv.className = 'message user';
-      // 組員 A 任務：在這裡加入時間戳
-      userDiv.textContent = text;
-      chatBox.appendChild(userDiv);
+      const ts = getTimestamp();
 
-      const botDiv = document.createElement('div');
-      botDiv.className = 'message bot';
-      botDiv.textContent = `你說了「${text}」！`;
-      chatBox.appendChild(botDiv);
+      appendMessage(chatBox, 'user', text, ts);
+      const botReply = `你說了「${text}」！`;
+      appendMessage(chatBox, 'bot', botReply, ts);
 
       input.value = '';
       chatBox.scrollTop = chatBox.scrollHeight;
+
+      // 即時儲存 session
+      saveCurrentSession();
+    }
+
+    function appendMessage(chatBox, role, text, ts) {
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.innerHTML = `${text}<span class="timestamp">${ts}</span>`;
+      chatBox.appendChild(div);
     }
 
     document.getElementById('user-input').addEventListener('keypress', function(e) {
@@ -72,6 +237,103 @@
     // 組員 C 任務：在這裡加字數統計更新邏輯
     // 組員 D 任務：在這裡加深色模式切換函數
 
+    // ─── 歷史紀錄面板 ─────────────────────────
+    function toggleHistory() {
+      const panel = document.getElementById('history-panel');
+      if (panel.style.display === 'none') {
+        renderHistoryPanel();
+        panel.style.display = 'block';
+      } else {
+        panel.style.display = 'none';
+      }
+    }
+
+    function renderHistoryPanel() {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username) return;
+      const key = getSessionsKey(username);
+      const sessions = JSON.parse(localStorage.getItem(key) || '[]');
+      const list = document.getElementById('history-list');
+
+      if (sessions.length === 0) {
+        list.innerHTML = '<p class="history-empty">尚無歷史對話紀錄</p>';
+        return;
+      }
+
+      list.innerHTML = sessions.map(s =>
+        `<div class="history-session" onclick="restoreSession('${s.id}')">
+          <div class="session-meta">
+            <span class="session-ts">🕐 ${s.ts}</span>
+            <span class="session-count">${s.messages.length} 則訊息</span>
+          </div>
+          <div class="session-preview">💬 ${s.preview || '（無內容）'}</div>
+        </div>`
+      ).join('');
+    }
+
+    // ─── 恢復歷史對話 ─────────────────────────
+    function restoreSession(sessionId) {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username) return;
+
+      const key = getSessionsKey(username);
+      const sessions = JSON.parse(localStorage.getItem(key) || '[]');
+      const session = sessions.find(s => s.id === sessionId);
+      if (!session) return;
+
+      // 先儲存目前 session
+      saveCurrentSession();
+
+      // 載入歷史對話到聊天視窗
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML = '';
+      session.messages.forEach(m => {
+        appendMessage(chatBox, m.role, m.text, m.ts);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // 顯示「查看歷史」提示，隱藏輸入框
+      isViewingHistory = true;
+      document.getElementById('restore-bar').style.display = 'flex';
+      document.getElementById('input-area').style.display = 'none';
+      document.getElementById('history-panel').style.display = 'none';
+    }
+
+    // ─── 返回目前對話 ─────────────────────────
+    function backToCurrentSession() {
+      isViewingHistory = false;
+      document.getElementById('restore-bar').style.display = 'none';
+      document.getElementById('input-area').style.display = 'flex';
+
+      // 重新載入目前 session 的訊息
+      const username = localStorage.getItem('chatbot_user');
+      const key = getSessionsKey(username);
+      const sessions = JSON.parse(localStorage.getItem(key) || '[]');
+      const current = sessions.find(s => s.id === currentSessionId);
+
+      const chatBox = document.getElementById('chat-box');
+      if (current) {
+        chatBox.innerHTML = '';
+        current.messages.forEach(m => appendMessage(chatBox, m.role, m.text, m.ts));
+      } else {
+        resetChatBox();
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function resetChatBox() {
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML = '<div class="message bot">嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉</div>';
+    }
+
+    // ─── 清除全部歷史 ─────────────────────────
+    function clearAllHistory() {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username) return;
+      if (confirm('確定要清除所有歷史對話紀錄嗎？')) {
+        localStorage.removeItem(getSessionsKey(username));
+        renderHistoryPanel();
+      }
     // ── 搜尋對話功能 ──
     function searchMessages() {
       const keyword = document.getElementById('search-input').value.trim().toLowerCase();
