@@ -7,17 +7,46 @@
 </head>
 <body>
 
-  <div class="container">
+  <!-- ────────── 登入畫面 ────────── -->
+  <div id="login-screen" class="login-overlay">
+    <div class="login-box">
+      <h2>🔑 登入 Chatbot</h2>
+      <p class="login-sub">請輸入你的用戶名稱以繼續</p>
+      <input id="username-input" type="text" placeholder="用戶名稱..." maxlength="20">
+      <button id="login-btn" onclick="login()">登入</button>
+      <p id="login-error" class="login-error"></p>
+    </div>
+  </div>
+
+  <!-- ────────── 主介面 ────────── -->
+  <div id="main-app" class="container" style="display:none;">
     <header>
       <!-- 組長任務：把標題改成你們組的名字 -->
       <h1>🤖 第 X 組的 Chatbot</h1>
       <p class="subtitle">W5 PR 協作練習</p>
+      <!-- 組員 C 任務：在 header 下方加字數統計 p 元素 -->
+      <!-- 組員 D 任務：在 header 加深色模式切換按鈕 -->
     </header>
 
-    <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
-    <!-- 組員 C 任務：在 header 下方加字數統計 p 元素 -->
-    <!-- 組員 D 任務：在 header 加深色模式切換按鈕 -->
+    <!-- 用戶資訊列 -->
+    <div class="user-bar">
+      <span id="welcome-text">👤 歡迎，<strong></strong></span>
+      <div class="user-bar-actions">
+        <button class="btn-history" onclick="toggleHistory()">📋 歷史紀錄</button>
+        <button class="btn-logout" onclick="logout()">登出</button>
+      </div>
+    </div>
 
+    <!-- 歷史對話紀錄面板 -->
+    <div id="history-panel" class="history-panel" style="display:none;">
+      <div class="history-header">
+        <span>📋 歷史對話紀錄</span>
+        <button onclick="clearHistory()">🗑 清除紀錄</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
+
+    <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
     <div id="chat-box">
       <div class="message bot">
         嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉
@@ -35,23 +64,87 @@
   </div>
 
   <script>
+    // ─── 工具函數 ───────────────────────────────
+    function getTimestamp() {
+      return new Date().toLocaleString('zh-Hant', {
+        month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    // ─── 登入 / 登出 ────────────────────────────
+    function login() {
+      const usernameInput = document.getElementById('username-input');
+      const username = usernameInput.value.trim();
+      const errorEl = document.getElementById('login-error');
+
+      if (!username) {
+        errorEl.textContent = '請輸入用戶名稱！';
+        usernameInput.focus();
+        return;
+      }
+
+      localStorage.setItem('chatbot_user', username);
+      errorEl.textContent = '';
+      showMainApp(username);
+    }
+
+    function logout() {
+      localStorage.removeItem('chatbot_user');
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('username-input').value = '';
+      // 清空聊天視窗
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML = '<div class="message bot">嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉</div>';
+    }
+
+    function showMainApp(username) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'flex';
+      document.querySelector('#welcome-text strong').textContent = username;
+      loadHistory(username);
+    }
+
+    // ─── 登入按鈕 Enter 鍵支援 ───────────────────
+    document.getElementById('username-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    // ─── 自動登入（如果已有儲存的用戶名） ────────
+    window.addEventListener('DOMContentLoaded', function() {
+      const saved = localStorage.getItem('chatbot_user');
+      if (saved) {
+        showMainApp(saved);
+      }
+    });
+
+    // ─── 聊天功能 ────────────────────────────────
     function sendMessage() {
       const input = document.getElementById('user-input');
       const chatBox = document.getElementById('chat-box');
       const text = input.value.trim();
+      const username = localStorage.getItem('chatbot_user') || '匿名';
 
       if (!text) return;
 
+      const ts = getTimestamp();
+
+      // 使用者訊息
       const userDiv = document.createElement('div');
       userDiv.className = 'message user';
-      // 組員 A 任務：在這裡加入時間戳
-      userDiv.textContent = text;
+      userDiv.innerHTML = `${text}<span class="timestamp">${ts}</span>`;
       chatBox.appendChild(userDiv);
 
+      // Bot 回覆
+      const botReply = `你說了「${text}」！`;
       const botDiv = document.createElement('div');
       botDiv.className = 'message bot';
-      botDiv.textContent = `你說了「${text}」！`;
+      botDiv.innerHTML = `${botReply}<span class="timestamp">${ts}</span>`;
       chatBox.appendChild(botDiv);
+
+      // 儲存到歷史紀錄
+      saveHistory(username, text, botReply, ts);
 
       input.value = '';
       chatBox.scrollTop = chatBox.scrollHeight;
@@ -64,6 +157,61 @@
     // 組員 B 任務：在這裡加 clearChat() 函數
     // 組員 C 任務：在這裡加字數統計更新邏輯
     // 組員 D 任務：在這裡加深色模式切換函數
+
+    // ─── 歷史紀錄功能（localStorage） ─────────────
+    function getHistoryKey(username) {
+      return `chatbot_history_${username}`;
+    }
+
+    function saveHistory(username, userMsg, botMsg, ts) {
+      const key = getHistoryKey(username);
+      const history = JSON.parse(localStorage.getItem(key) || '[]');
+      history.push({ user: userMsg, bot: botMsg, ts });
+      // 最多保留 50 筆
+      if (history.length > 50) history.shift();
+      localStorage.setItem(key, JSON.stringify(history));
+    }
+
+    function loadHistory(username) {
+      const key = getHistoryKey(username);
+      const history = JSON.parse(localStorage.getItem(key) || '[]');
+      renderHistory(history);
+    }
+
+    function renderHistory(history) {
+      const list = document.getElementById('history-list');
+      if (history.length === 0) {
+        list.innerHTML = '<p class="history-empty">尚無對話紀錄</p>';
+        return;
+      }
+      list.innerHTML = history.map((item, i) =>
+        `<div class="history-item">
+          <span class="history-ts">${item.ts}</span>
+          <div class="history-msg user-msg">👤 ${item.user}</div>
+          <div class="history-msg bot-msg">🤖 ${item.bot}</div>
+        </div>`
+      ).reverse().join('');
+    }
+
+    function toggleHistory() {
+      const panel = document.getElementById('history-panel');
+      const username = localStorage.getItem('chatbot_user');
+      if (panel.style.display === 'none') {
+        loadHistory(username);
+        panel.style.display = 'block';
+      } else {
+        panel.style.display = 'none';
+      }
+    }
+
+    function clearHistory() {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username) return;
+      if (confirm('確定要清除所有歷史對話紀錄嗎？')) {
+        localStorage.removeItem(getHistoryKey(username));
+        renderHistory([]);
+      }
+    }
   </script>
 
 </body>
