@@ -53,6 +53,13 @@
     </div>
 
     <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
+    <!-- 搜尋對話功能 -->
+    <div class="search-area">
+      <input id="search-input" type="text" placeholder="🔍 搜尋對話內容..." oninput="searchMessages()">
+      <button id="clear-search-btn" onclick="clearSearch()" title="清除搜尋">✕</button>
+      <span id="search-result-count"></span>
+    </div>
+
     <div id="chat-box">
       <div class="message bot">
         嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉
@@ -327,6 +334,50 @@
         localStorage.removeItem(getSessionsKey(username));
         renderHistoryPanel();
       }
+    // ── 搜尋對話功能 ──
+    function searchMessages() {
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+      const messages = document.querySelectorAll('#chat-box .message');
+      const countSpan = document.getElementById('search-result-count');
+      const clearBtn = document.getElementById('clear-search-btn');
+      let matchCount = 0;
+
+      // 沒有關鍵字時，顯示全部訊息
+      if (!keyword) {
+        messages.forEach(msg => {
+          msg.style.display = '';
+          msg.innerHTML = msg.textContent; // 移除高亮
+        });
+        countSpan.textContent = '';
+        clearBtn.style.display = 'none';
+        return;
+      }
+
+      clearBtn.style.display = 'inline-block';
+
+      messages.forEach(msg => {
+        const originalText = msg.textContent;
+        const lowerText = originalText.toLowerCase();
+
+        if (lowerText.includes(keyword)) {
+          msg.style.display = '';
+          matchCount++;
+          // 高亮匹配文字
+          const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+          msg.innerHTML = originalText.replace(regex, '<mark class="highlight">$1</mark>');
+        } else {
+          msg.style.display = 'none';
+          msg.innerHTML = originalText; // 清除高亮
+        }
+      });
+
+      countSpan.textContent = `找到 ${matchCount} 則訊息`;
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      searchMessages();
+      document.getElementById('search-input').focus();
     }
   </script>
 
