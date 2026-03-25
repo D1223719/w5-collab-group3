@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>我們組的 Chatbot</title>
+  <title>第三組的 Chatbot</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,58 +21,54 @@
   </div>
 
   <!-- ────────── 主介面 ────────── -->
-  <div id="main-app" class="container" style="display:none;">
-    <header>
-      <h1>🤖 第 X 組的 Chatbot</h1>
-      <p class="subtitle">W5 PR 協作練習</p>
-      <!-- 組員 C 任務：在 header 下方加字數統計 p 元素 -->
-      <!-- 組員 D 任務：在 header 加深色模式切換按鈕 -->
-    </header>
+  <div id="main-app" class="app-container" style="display:none;">
+    <!-- 左側邊欄 -->
+    <aside class="sidebar">
+      <header>
+        <h1>🤖 第三組的 Chatbot</h1>
+        <p class="subtitle">W5 PR 協作練習</p>
+      </header>
 
-    <!-- 用戶資訊列 -->
-    <div class="user-bar">
-      <span id="welcome-text">👤 歡迎，<strong></strong></span>
-      <div class="user-bar-actions">
-        <button class="btn-history" onclick="toggleHistory()">📋 歷史紀錄</button>
+      <button class="new-chat-btn" onclick="createNewChat()">＋ 新增對話</button>
+
+      <div class="search-area">
+        <input id="search-input" type="text" placeholder="🔍 搜尋紀錄..." oninput="searchMessages()">
+        <button id="clear-search-btn" onclick="clearSearch()" title="清除搜尋" style="display:none;">✕</button>
+      </div>
+      <span id="search-result-count"></span>
+
+      <div id="history-panel" class="history-panel">
+        <div class="history-header">
+          <span>📋 歷史對話</span>
+          <button onclick="clearAllHistory()">🗑 清除全部</button>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </div>
+
+      <div class="user-bar">
+        <span id="welcome-text">👤 <strong></strong></span>
         <button class="btn-logout" onclick="logout()">登出</button>
       </div>
-    </div>
+    </aside>
 
-    <!-- 歷史對話紀錄面板 -->
-    <div id="history-panel" class="history-panel" style="display:none;">
-      <div class="history-header">
-        <span>📋 歷史對話（點擊可恢復）</span>
-        <button onclick="clearAllHistory()">🗑 全部清除</button>
+    <!-- 右側主要聊天區 -->
+    <main class="chat-area">
+      <div id="restore-bar" class="restore-bar" style="display:none;">
+        <span>⏪ 正在查看歷史對話</span>
+        <button onclick="backToCurrentSession()">返回目前對話</button>
       </div>
-      <div id="history-list" class="history-list"></div>
-    </div>
 
-    <!-- 恢復提示列 -->
-    <div id="restore-bar" class="restore-bar" style="display:none;">
-      <span>⏪ 正在查看歷史對話</span>
-      <button onclick="backToCurrentSession()">返回目前對話</button>
-    </div>
-
-    <!-- 組員 A 任務：在 .message 裡加上時間戳 span -->
-    <!-- 搜尋對話功能 -->
-    <div class="search-area">
-      <input id="search-input" type="text" placeholder="🔍 搜尋對話內容..." oninput="searchMessages()">
-      <button id="clear-search-btn" onclick="clearSearch()" title="清除搜尋">✕</button>
-      <span id="search-result-count"></span>
-    </div>
-
-    <div id="chat-box">
-      <div class="message bot">
-        嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉
+      <div id="chat-box">
+        <div class="message bot">
+          嗨！這是我們組用 PR 協作做出來的 Chatbot 🎉
+        </div>
       </div>
-    </div>
 
-    <div id="input-area" class="input-area">
-      <input id="user-input" type="text" placeholder="輸入訊息...">
-      <button onclick="sendMessage()">送出</button>
-    </div>
-
-    <footer></footer>
+      <div id="input-area" class="input-area">
+        <input id="user-input" type="text" placeholder="輸入訊息...">
+        <button onclick="sendMessage()">送出</button>
+      </div>
+    </main>
   </div>
 
   <script>
@@ -120,7 +116,6 @@
       document.getElementById('main-app').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('username-input').value = '';
-      document.getElementById('history-panel').style.display = 'none';
       document.getElementById('restore-bar').style.display = 'none';
       resetChatBox();
     }
@@ -129,21 +124,31 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('main-app').style.display = 'flex';
       document.querySelector('#welcome-text strong').textContent = username;
+      renderHistoryPanel();
     }
 
     // ─── 登入鍵盤支援 ─────────────────────────
-    document.getElementById('username-input').addEventListener('keypress', function(e) {
+    document.getElementById('username-input').addEventListener('keypress', function (e) {
       if (e.key === 'Enter') login();
     });
 
+    // ─── 新增對話 ─────────────────────────────
+    function createNewChat() {
+      const username = localStorage.getItem('chatbot_user');
+      if (!username) return;
+      saveCurrentSession();
+      startNewSession(username);
+      renderHistoryPanel();
+    }
+
     // ─── 自動登入 ─────────────────────────────
-    window.addEventListener('DOMContentLoaded', function() {
-      const saved = localStorage.getItem('chatbot_user');
-      if (saved) {
-        startNewSession(saved);
-        showMainApp(saved);
-      }
-    });
+    // window.addEventListener('DOMContentLoaded', function () {
+    //   const saved = localStorage.getItem('chatbot_user');
+    //   if (saved) {
+    //     startNewSession(saved);
+    //     showMainApp(saved);
+    //   }
+    // });
 
     // ─── Session 管理 ─────────────────────────
     function getSessionsKey(username) {
@@ -295,7 +300,6 @@
       isViewingHistory = true;
       document.getElementById('restore-bar').style.display = 'flex';
       document.getElementById('input-area').style.display = 'none';
-      document.getElementById('history-panel').style.display = 'none';
     }
 
     // ─── 返回目前對話 ─────────────────────────
@@ -333,6 +337,8 @@
         localStorage.removeItem(getSessionsKey(username));
         renderHistoryPanel();
       }
+    }
+
     // ── 搜尋對話功能 ──
     function searchMessages() {
       const keyword = document.getElementById('search-input').value.trim().toLowerCase();
