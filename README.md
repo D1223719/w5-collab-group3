@@ -9,10 +9,10 @@
 
 | 項目        | 填寫           |
 | ----------- | -------------- |
-| 組別        | 第 ＿ 組       |
-| 組員        |                |
-| GitHub Repo |                |
-| 報告日期    | 2025 / ＿ / ＿ |
+| 組別        | 第三組  |
+| 組員        | 黃國傑  楊永蘭  蔡秉倫  辛晴  薛帆凱 |
+| GitHub Repo | w5-collab-group3 |
+| 報告日期    | 2025 /03 /25 |
 
 ---
 
@@ -164,11 +164,11 @@ blocking: 這個會影響其他功能，需要修一下才能 merge。
 
 | 組員姓名 | 負責分支 | 主要修改內容 | PR 連結 | 是否完成 |
 | -------- | -------- | ------------ | ------- | -------- |
-|          |          |              |         | ✅ / ❌  |
-|          |          |              |         | ✅ / ❌  |
-|          |          |              |         | ✅ / ❌  |
-|          |          |              |         | ✅ / ❌  |
-|          |          |              |         | ✅ / ❌  |
+| 楊永蘭 |D1245806 | 新增登入功能以及儲存歷史對話紀錄分支 | https://github.com/D1223719/w5-collab-group3/pull/1 | ✅ |
+| 蔡秉倫 |feature/search-conversation| 新增搜尋對話功能 | https://github.com/D1223719/w5-collab-group3/pull/3 | ✅ |
+| 辛晴 | feature/xin | 完成背景愛心動畫與 UI 配色更改  |https://github.com/D1223719/w5-collab-group3/pull/4 |✅|
+| 薛帆凱 |feature/member-sailboat | 新增讀取TXT檔內容的功能 | https://github.com/D1223719/w5-collab-group3/pull/2 | ✅ |
+
 
 ---
 
@@ -178,7 +178,8 @@ blocking: 這個會影響其他功能，需要修一下才能 merge。
 
 > 截圖：GitHub repo → Pull requests，顯示所有 PR 的狀態（open / merged）
 
-（貼上截圖）
+<img width="1847" height="798" alt="image" src="https://github.com/user-attachments/assets/4f3b0ef7-576d-48b2-981e-3583abb6932a" />
+
 
 ---
 
@@ -186,7 +187,10 @@ blocking: 這個會影響其他功能，需要修一下才能 merge。
 
 > 截圖：其中一個 PR 的描述頁面，顯示完整的「做了什麼 / 如何測試」內容
 
-（貼上截圖）
+<img width="1720" height="962" alt="image" src="https://github.com/user-attachments/assets/35858d00-d55b-4f3f-a1a3-f217ddfb73b5" />
+<img width="1070" height="562" alt="image" src="https://github.com/user-attachments/assets/03893e45-b881-47f4-b0b4-06d9d36735a4" />
+<img width="1063" height="572" alt="image" src="https://github.com/user-attachments/assets/e7ecfcb0-9c73-4e33-9f57-32089bc5848b" />
+
 
 ---
 
@@ -194,7 +198,8 @@ blocking: 這個會影響其他功能，需要修一下才能 merge。
 
 > 截圖：Files changed 頁面，顯示 inline comment 的留言
 
-（貼上截圖）
+<img width="1276" height="538" alt="image" src="https://github.com/user-attachments/assets/f57b7b3d-4d2e-41a9-b77c-11079fdc0daf" />
+
 
 ---
 
@@ -202,7 +207,8 @@ blocking: 這個會影響其他功能，需要修一下才能 merge。
 
 > 截圖：某個 PR 頁面顯示「Merged」紫色標籤
 
-（貼上截圖）
+<img width="1684" height="584" alt="image" src="https://github.com/user-attachments/assets/d3715e84-5057-43a9-b6fe-3fe394794a9a" />
+
 
 ---
 
