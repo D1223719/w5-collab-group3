@@ -28,6 +28,8 @@
       <input id="user-input" type="text" placeholder="輸入訊息...">
       <button onclick="sendMessage()">送出</button>
       <!-- 組員 B 任務：在這裡加清除按鈕 -->
+      <input type="file" id="file-input" accept=".txt,.csv,.json,.md,.html,.css,.js" style="display:none;">
+      <button onclick="document.getElementById('file-input').click()">📂 讀取檔案</button>
     </div>
 
     <!-- 組員 E 任務：在這裡加鍵盤快捷鍵說明 -->
@@ -64,6 +66,50 @@
     // 組員 B 任務：在這裡加 clearChat() 函數
     // 組員 C 任務：在這裡加字數統計更新邏輯
     // 組員 D 任務：在這裡加深色模式切換函數
+
+    // 讀取檔案功能（自動偵測編碼）
+    function displayFileContent(fileName, content) {
+      const chatBox = document.getElementById('chat-box');
+
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message user';
+      userDiv.textContent = `📂 已上傳檔案：${fileName}`;
+      chatBox.appendChild(userDiv);
+
+      const botDiv = document.createElement('div');
+      botDiv.className = 'message bot';
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'white-space:pre-wrap;word-wrap:break-word;margin-top:8px;';
+      pre.textContent = content;
+      botDiv.innerHTML = `<strong>📄 ${fileName} 的內容：</strong>`;
+      botDiv.appendChild(pre);
+      chatBox.appendChild(botDiv);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // 先用 UTF-8 讀取
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const text = event.target.result;
+        // 如果包含亂碼替換字元，改用 Big5 重新讀取
+        if (text.includes('\uFFFD')) {
+          const reader2 = new FileReader();
+          reader2.onload = function(ev) {
+            displayFileContent(file.name, ev.target.result);
+          };
+          reader2.readAsText(file, 'Big5');
+        } else {
+          displayFileContent(file.name, text);
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+      e.target.value = '';
+    });
   </script>
 
 </body>
