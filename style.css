@@ -1,14 +1,19 @@
 /* W5 PR 協作練習樣式 */
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: sans-serif;
-  background-color: #f0f4f8;
+  background-color: #fff9c4;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 /* ══════════════════════════════════════
@@ -69,9 +74,9 @@ body {
    主介面容器
    ══════════════════════════════════════ */
 .container {
-  background: white;
+  background: #fffcf0;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 480px;
   max-width: 95vw;
   overflow: hidden;
@@ -82,12 +87,20 @@ body {
    組長任務：修改 background 顏色
    ──────────────────────────────────── */
 header {
-  background: #4f8ef7;
+  background: #ff8fab;
   color: white;
   padding: 20px 24px;
 }
-header h1 { font-size: 20px; }
-header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+header h1 {
+  font-size: 20px;
+}
+
+header .subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
 
 /* ── 用戶資訊列 ── */
 .user-bar {
@@ -294,7 +307,7 @@ mark.highlight {
 }
 
 .message.user {
-  background: #4f8ef7;
+  background: #ff8fab;
   color: white;
   align-self: flex-end;
 }
@@ -315,11 +328,13 @@ mark.highlight {
   outline: none;
 }
 
-.input-area input:focus { border-color: #4f8ef7; }
+.input-area input:focus {
+  border-color: #a2d2ff;
+}
 
 /* ── 組員 B 任務：在這裡加清除按鈕樣式 ── */
 .input-area button {
-  background: #4f8ef7;
+  background: #a2d2ff;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -328,7 +343,9 @@ mark.highlight {
   font-size: 14px;
 }
 
-.input-area button:hover { opacity: 0.85; }
+.input-area button:hover {
+  opacity: 0.85;
+}
 
 /* ── 組員 D 任務：在這裡加 body.dark 深色模式樣式 ── */
 
@@ -339,4 +356,73 @@ footer {
   color: #aaa;
   text-align: center;
   border-top: 1px solid #f0f0f0;
+}
+
+.hearts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heart {
+  position: absolute;
+  bottom: -50px;
+  font-size: 24px;
+  color: #ff4d4d;
+  animation: floatUp 6s infinite linear;
+  opacity: 0;
+}
+
+.heart:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.heart:nth-child(2) {
+  left: 25%;
+  animation-delay: 2s;
+}
+
+.heart:nth-child(3) {
+  left: 45%;
+  animation-delay: 1s;
+}
+
+.heart:nth-child(4) {
+  left: 65%;
+  animation-delay: 3s;
+}
+
+.heart:nth-child(5) {
+  left: 85%;
+  animation-delay: 1.5s;
+}
+
+.heart:nth-child(6) {
+  left: 95%;
+  animation-delay: 4s;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-110vh) rotate(360deg);
+    opacity: 0;
+  }
 }
